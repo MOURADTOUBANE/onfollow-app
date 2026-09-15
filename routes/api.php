@@ -16,5 +16,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/applications', [ApplicationController::class, 'store']);
     Route::get('/applications/{application}', [ApplicationController::class, 'show']);
     Route::patch('/applications/{application}', [ApplicationController::class, 'update']);
+    Route::post('/applications/{application}/status', [ApplicationController::class, 'updateStatus']);
 
 });

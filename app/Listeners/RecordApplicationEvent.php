@@ -3,24 +3,19 @@
 namespace App\Listeners;
 
 use App\Events\ApplicationStatusChanged;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Models\ApplicationEvent;
 
 class RecordApplicationEvent
 {
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Handle the event.
-     */
     public function handle(ApplicationStatusChanged $event): void
     {
-        //
+        ApplicationEvent::create([
+            'application_id' => $event->application->id,
+            'type' => 'status_changed',
+            'source' => $event->source,
+            'previous_data' => ['status' => $event->previousStatus],
+            'new_data' => ['status' => $event->newStatus],
+            'occurred_at' => now(),
+        ]);
     }
 }
