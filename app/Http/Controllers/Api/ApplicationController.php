@@ -100,4 +100,13 @@ class ApplicationController extends Controller
 
         return response()->json(new ApplicationResource($updated));
     }
+
+    public function destroy(Application $application)
+    {
+        $this->authorize('delete', $application);
+ 
+        $this->applications->delete($application);
+ 
+        return response()->json(null, 204);
+    }
 }

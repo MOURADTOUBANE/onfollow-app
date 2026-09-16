@@ -81,6 +81,11 @@ class ApplicationService
         return $application->fresh();
     }
 
+    public function delete(Application $application): void
+    {
+        $application->delete();
+    }
+
     private function hashUrl(?string $url): ?string
     {
         return $url ? hash('sha256', $url) : null;
