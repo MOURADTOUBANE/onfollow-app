@@ -4,12 +4,21 @@ use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\FollowUpActionController;
+use App\Http\Controllers\Api\EmailVerificationController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware('signed')
+    ->name('verification.verify');
+Route::middleware(['auth:sanctum', 'throttle:6,1'])->group(function () {
+        Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend']);
+    });
 
-Route::middleware('auth:sanctum')->group(function () {
+
+
+Route::middleware(['auth:sanctum','verified'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
     /* Applications */
