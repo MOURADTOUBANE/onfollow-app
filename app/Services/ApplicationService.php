@@ -5,10 +5,13 @@ namespace App\Services;
 use App\Models\Application;
 use App\Models\ApplicationEvent;
 use App\Models\User;
+use App\Support\UrlNormalizer;
 
 class ApplicationService
 {
-    
+    /**
+     * @return array{data: \Illuminate\Support\Collection, total: int}
+     */
     public function list(User $user, array $filters = [], int $limit = 20, int $offset = 0): array
     {
         $query = $user->applications()->orderByDesc('created_at');
@@ -29,6 +32,14 @@ class ApplicationService
             });
         }
 
+        if (! empty($filters['applied_from'])) {
+            $query->whereDate('applied_at', '>=', $filters['applied_from']);
+        }
+
+        if (! empty($filters['applied_to'])) {
+            $query->whereDate('applied_at', '<=', $filters['applied_to']);
+        }
+
         $total = (clone $query)->count();
         $data = $query->skip($offset)->take($limit)->get();
 
@@ -37,7 +48,7 @@ class ApplicationService
 
     public function create(User $user, array $data): Application
     {
-        $data['canonical_url_hash'] = $this->hashUrl($data['canonical_url'] ?? null);
+        $data['canonical_url_hash'] = UrlNormalizer::hash($data['canonical_url'] ?? null);
         $data['status'] = $data['status'] ?? 'saved';
 
         $application = $user->applications()->create($data);
@@ -58,13 +69,12 @@ class ApplicationService
 
     public function update(Application $application, array $data): Application
     {
-        // On ne garde que les champs réellement modifiés pour l'historique
         $previous = collect($data)->keys()
             ->mapWithKeys(fn ($field) => [$field => $application->{$field}])
             ->toArray();
 
         if (array_key_exists('canonical_url', $data)) {
-            $data['canonical_url_hash'] = $this->hashUrl($data['canonical_url']);
+            $data['canonical_url_hash'] = UrlNormalizer::hash($data['canonical_url']);
         }
 
         $application->update($data);
@@ -84,10 +94,5 @@ class ApplicationService
     public function delete(Application $application): void
     {
         $application->delete();
-    }
-
-    private function hashUrl(?string $url): ?string
-    {
-        return $url ? hash('sha256', $url) : null;
     }
 }

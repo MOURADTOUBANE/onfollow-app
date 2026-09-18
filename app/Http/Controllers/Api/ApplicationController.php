@@ -25,14 +25,14 @@ class ApplicationController extends Controller
     {
         $limit = min((int) $request->query('limit', 20), 100);
         $offset = max((int) $request->query('offset', 0), 0);
-
+ 
         $result = $this->applications->list(
             user: $request->user(),
-            filters: $request->only(['status', 'source', 'search']),
+            filters: $request->only(['status', 'source', 'search', 'applied_from', 'applied_to']),
             limit: $limit,
             offset: $offset,
         );
-
+ 
         return response()->json([
             'data' => ApplicationResource::collection($result['data']),
             'meta' => [
