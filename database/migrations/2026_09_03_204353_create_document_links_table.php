@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('document_links', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('application_id')->constrained()->cascadeOnDelete();
+
+            $table->string('kind', 30); // cv, cover_letter, portfolio, other
+            $table->string('storage_key', 500)->nullable(); // référence privée
+            $table->string('external_url', 2048)->nullable();
+            $table->string('version_label', 100)->nullable(); // ex: "CV English v2"
+
+            $table->timestamps();
+
+            $table->index('application_id');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('document_links');
+    }
+};
